@@ -1,10 +1,13 @@
 import sys
+from random import randint
 
 import pygame
 
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from alien import Alien
+from star import Star
 
 
 class AlienInvasion:
@@ -26,6 +29,11 @@ class AlienInvasion:
         # 创建飞船实例
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
+        self.aliens = pygame.sprite.Group()
+        self.stars = pygame.sprite.Group()
+
+        self._create_stars()
+        self._create_fleet()
 
     def run_game(self):
         """开始游戏主循环"""
@@ -45,6 +53,7 @@ class AlienInvasion:
         self.ship.blitme()
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
+        self.aliens.draw(self.screen)
         # 让最近绘制的屏幕可见
         pygame.display.flip()
 
@@ -90,6 +99,47 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
+
+    def _create_fleet(self):
+        """创建外星人群"""
+        # 创建一个外星人并计算一行可以容纳多少个外星人
+        # 外星人的间距为外星人的宽度
+        alien = Alien(self)
+        alien_width, alien_height = alien.rect.size
+        available_space_x = self.settings.screen_width - (2 * alien_width)
+        number_aliens_x = available_space_x // (2 * alien_width)
+
+        # 计算屏幕可容纳多少个外星人
+        ship_height = self.ship.rect.height
+        available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
+        number_rows = available_space_y // (2 * alien_height)
+
+        # 创建第一行外星人
+        for row_number in range(number_rows):
+            for alien_number in range(number_aliens_x):
+                # 创建一个外星人并将其加入当行
+                self._create_alien(alien_number, row_number)
+
+    def _create_stars(self):
+        """创建星星"""
+        for row_number in range(self.settings.star_number):
+            self._create_star()
+
+    def _create_alien(self, alien_number, row_number):
+        """创建一个外星人,并将其放在当行"""
+        alien = Alien(self)
+        alien_width = alien.rect.width
+        alien.x = alien_width + 2 * alien_width * alien_number
+        alien.rect.x = alien.x
+        alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
+        self.aliens.add(alien)
+
+    def _create_star(self,):
+        star = Star(self)
+        star.x = randint(0, self.settings.screen_width)
+        star.rect.x = star.x
+        star.rect.y = randint(0, self.settings.screen_height - 1.5 * self.ship.rect.height)
+        self.aliens.add(star)
 
 
 if __name__ == '__main__':
