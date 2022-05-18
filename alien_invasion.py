@@ -32,7 +32,7 @@ class AlienInvasion:
 
         # 创建存储游戏统计信息的实例
         # 并创建记分牌
-            # 创建一个用于存储游戏统计信息的实例
+        # 创建一个用于存储游戏统计信息的实例
         self.stats = GameStatus(self)
         self.sb = Scoreboard(self)
 
@@ -105,9 +105,13 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
+            # 游戏结束前存储最高分
+            self.stats.write_high_score()
             sys.exit()
         elif event.key == pygame.K_SPACE:
-            self._fire_bullet()
+            # 游戏处在运行状态就开火
+            if self.stats.game_active:
+                self._fire_bullet()
 
     def _check_up_events(self, event):
         """响应松开"""
@@ -238,6 +242,8 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.stats.game_active = False
+            # 游戏结束写最高分入文件中
+            self.stats.write_high_score()
             pygame.mouse.set_visible(True)
 
     def _check_aliens_bottom(self):

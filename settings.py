@@ -20,7 +20,7 @@ class Settings:
         self.star_number = 150
         # 外星人设置
         self.alien_speed = 1.0
-        self.fleet_drop_speed = 10
+        self.fleet_drop_speed = 50
         # fleet_direction为 1 表示向右移，为 -1 表示向左移
         self.fleet_direction = 1
         # 加快游戏节奏速度
