@@ -11,6 +11,7 @@ from alien import Alien
 from star import Star
 from game_stats import GameStatus
 from button import Button
+from scoreboard import Scoreboard
 
 
 class AlienInvasion:
@@ -29,8 +30,11 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Alien Invasion")
 
-        # 创建一个用于存储游戏统计信息的实例
+        # 创建存储游戏统计信息的实例
+        # 并创建记分牌
+            # 创建一个用于存储游戏统计信息的实例
         self.stats = GameStatus(self)
+        self.sb = Scoreboard(self)
 
         # 创建飞船实例
         self.ship = Ship(self)
@@ -64,6 +68,9 @@ class AlienInvasion:
         self.screen.fill(self.settings.bg_color)
         # 绘制星星在屏幕上
         self.stars.draw(self.screen)
+
+        # 显示得分
+        self.sb.show_score()
 
         # 将飞船绘制到屏幕上
         self.ship.blitme()
@@ -199,6 +206,11 @@ class AlienInvasion:
         """响应子弹和外星人碰撞"""
         # 删除发生碰撞的子弹和外星人
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        if collisions:
+            for alien in collisions.values():
+                self.stats.score += self.settings.alien_point * len(alien)
+            self.sb.prep_score()
+            self.sb.check_high_score()
 
         if not self.aliens:
             # 删除现有的子弹并新建一群外星人
@@ -206,11 +218,16 @@ class AlienInvasion:
             self._create_fleet()
             self.settings.increase_speed()
 
+            # 提高等级
+            self.stats.level += 1
+            self.sb.prep_level()
+
     def _ship_hit(self):
         """响应飞船被外星人撞到。"""
         if self.stats.ships_left > 0:
-            # 将ships_left 减1
+            # 将ships_left 减1 并更新记分牌
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
             # 清空余下的外星人和子弹
             self.aliens.empty()
             self.bullets.empty()
@@ -241,6 +258,9 @@ class AlienInvasion:
             # 重置游戏统计信息
             self.stats.reset_stats()
             self.stats.game_active = True
+            self.sb.prep_score()
+            self.sb.prep_level()
+            self.sb.prep_ships()
 
             # 清楚余下的外星人和子弹
             self.aliens.empty()
