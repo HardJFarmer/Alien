@@ -106,7 +106,7 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             # 游戏结束前存储最高分
-            self.stats.write_high_score()
+            self.stats.write_high_score(self.stats.high_score)
             sys.exit()
         elif event.key == pygame.K_SPACE:
             # 游戏处在运行状态就开火
@@ -243,7 +243,7 @@ class AlienInvasion:
         else:
             self.stats.game_active = False
             # 游戏结束写最高分入文件中
-            self.stats.write_high_score()
+            self.stats.write_high_score(self.stats.high_score)
             pygame.mouse.set_visible(True)
 
     def _check_aliens_bottom(self):

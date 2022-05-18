@@ -11,7 +11,7 @@ class GameStatus:
         # 任何情况下都不应重置最高得分
         self.ships_left = 0
         # 任何情况下都不应该重置最高得分
-        self.high_score = self._read_high_score()
+        self.high_score = self.read_high_score()
 
     def reset_stats(self):
         """初始化在游戏运行期间肯变化的统计信息"""
@@ -19,16 +19,16 @@ class GameStatus:
         self.score = 0
         self.level = 1
 
-    def _read_high_score(self):
+    def read_high_score(self):
         """读取文件中得最高分"""
         try:
-            with open("highScore.txt", 'r') as file_object:
+            with open("file/highScore.txt", 'r') as file_object:
                 high_score = file_object.read()
             return int(high_score)
         except Exception:
             # 如果读文件发生错误直接返回0分
             return 0
 
-    def write_high_score(self):
-        with open("highScore.txt", 'w') as file_object:
-            file_object.write(str(self.high_score))
+    def write_high_score(self, score):
+        with open("file/highScore.txt", 'w') as file_object:
+            file_object.write(str(score))
