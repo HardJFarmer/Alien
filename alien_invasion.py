@@ -10,7 +10,7 @@ from bullet import Bullet
 from alien import Alien
 from star import Star
 from game_stats import GameStatus
-
+from button import Button
 
 
 class AlienInvasion:
@@ -41,6 +41,9 @@ class AlienInvasion:
         self._create_stars()
         self._create_fleet()
 
+        # 创建play按钮
+        self.play_button = Button(self, "Play")
+
     def run_game(self):
         """开始游戏主循环"""
         while True:
@@ -67,6 +70,11 @@ class AlienInvasion:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
+
+        # 如果游戏处于非活动状态，就绘制Play按钮
+        if not self.stats.game_active:
+            self.play_button.draw_button()
+
         # 让最近绘制的屏幕可见
         pygame.display.flip()
 
@@ -79,6 +87,9 @@ class AlienInvasion:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
                 self._check_up_events(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
 
     def _check_keydown_events(self, event):
         """响应按键"""
@@ -149,7 +160,7 @@ class AlienInvasion:
         alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
         self.aliens.add(alien)
 
-    def _create_star(self,):
+    def _create_star(self, ):
         star = Star(self)
         star.x = randint(0, self.settings.screen_width)
         star.rect.x = star.x
@@ -193,6 +204,7 @@ class AlienInvasion:
             # 删除现有的子弹并新建一群外星人
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
     def _ship_hit(self):
         """响应飞船被外星人撞到。"""
@@ -209,6 +221,7 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.stats.game_active = False
+            pygame.mouse.set_visible(True)
 
     def _check_aliens_bottom(self):
         """检查是否有外星人到达了屏幕底端"""
@@ -218,6 +231,27 @@ class AlienInvasion:
                 # 像飞船被撞到一样处理
                 self._ship_hit()
                 break
+
+    def _check_play_button(self, mouse_pos):
+        """在玩家单机play按钮后开始新游戏"""
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.stats.game_active:
+            # 重置游戏设置
+            self.settings.initialize_dynamic_settings()
+            # 重置游戏统计信息
+            self.stats.reset_stats()
+            self.stats.game_active = True
+
+            # 清楚余下的外星人和子弹
+            self.aliens.empty()
+            self.bullets.empty()
+
+            # 创建一群新的外星人并让飞船居中
+            self._create_fleet()
+            self.ship.center_ship()
+
+            # 隐藏鼠标光标
+            pygame.mouse.set_visible(False)
 
 
 if __name__ == '__main__':
